@@ -1,4 +1,4 @@
-﻿using APITutorials.DTOs;
+﻿using APITutorials.DTOs.Stock;
 using APITutorials.Models;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 

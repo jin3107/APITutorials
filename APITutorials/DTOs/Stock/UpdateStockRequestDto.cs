@@ -1,4 +1,4 @@
-﻿namespace APITutorials.DTOs
+﻿namespace APITutorials.DTOs.Stock
 {
     public class UpdateStockRequestDto
     {

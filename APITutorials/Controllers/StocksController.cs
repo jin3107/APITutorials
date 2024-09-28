@@ -1,5 +1,5 @@
 ﻿using APITutorials.Data;
-using APITutorials.DTOs;
+using APITutorials.DTOs.Stock;
 using APITutorials.Mappers;
 using APITutorials.Models;
 using Microsoft.AspNetCore.Http;

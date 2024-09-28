@@ -1,9 +1,11 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+﻿using APITutorials.Models;
+using System.ComponentModel.DataAnnotations.Schema;
 
-namespace APITutorials.DTOs
+namespace APITutorials.DTOs.Stock
 {
-    public class CreateStockRequestDto
+    public class StockDto
     {
+        public int Id { get; set; }
         public string? Symbol { get; set; }
         public string? CompanyName { get; set; }
         public decimal Purchase { get; set; }
