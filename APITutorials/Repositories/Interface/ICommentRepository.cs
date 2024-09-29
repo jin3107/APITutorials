@@ -1,9 +1,14 @@
-﻿using APITutorials.Models;
+﻿using APITutorials.DTOs.Comment;
+using APITutorials.Models;
 
 namespace APITutorials.Repositories.Interface
 {
     public interface ICommentRepository
     {
         Task<List<Comment>> GetAllAsync();
+        Task<Comment?> GetByIdAsync(Guid id);
+        Task<Comment?> CreateAsync(Comment commentModel);
+        Task<Comment?> UpdateAsync(Guid id, UpdateCommentRequestDto commentDto);
+        Task<Comment?> DeleteAsync(Guid id);
     }
 }
