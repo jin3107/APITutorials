@@ -10,5 +10,6 @@ namespace APITutorials.Repositories.Interface
         Task<Stock?> CreateAsync(Stock stockModel);
         Task<Stock?> UpdateAsync(Guid id, UpdateStockRequestDto stockDto);
         Task<Stock?> DeleteAsync(Guid id);
+        Task<bool> StockExits(Guid id);
     }
 }
