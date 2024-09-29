@@ -25,14 +25,20 @@ namespace APITutorials.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
             var stocks = await _stockRepository.GetAllAsync();
             var stockDto = stocks.Select(s => s.ToStockDto());
             return Ok(stocks);
         }
 
-        [HttpGet("{id}")]
+        [HttpGet("{id:guid}")]
         public async Task<IActionResult> GetById([FromRoute] Guid id)
         {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
             var stock = await _stockRepository.GetByIdAsync(id);
             if (stock == null) 
             {
@@ -45,6 +51,9 @@ namespace APITutorials.Controllers
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] CreateStockRequestDto stockDto)
         {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
             var stockModel = stockDto.ToStockFromCreateDto();
             await _stockRepository.CreateAsync(stockModel);
 
@@ -52,9 +61,12 @@ namespace APITutorials.Controllers
         }
 
         [HttpPut]
-        [Route("{id}")]
+        [Route("{id:guid}")]
         public async Task<IActionResult> Update([FromRoute] Guid id, [FromBody] UpdateStockRequestDto updateDto)
         {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
             var stockModel = await _stockRepository.UpdateAsync(id, updateDto);
             if (stockModel == null)
             {
@@ -65,9 +77,12 @@ namespace APITutorials.Controllers
         }
 
         [HttpDelete]
-        [Route("{id}")]
+        [Route("{id:guid}")]
         public async Task<IActionResult> Delete([FromRoute] Guid id)
         {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
             var stockModel = await _stockRepository.DeleteAsync(id);
             if (stockModel == null)
             {
