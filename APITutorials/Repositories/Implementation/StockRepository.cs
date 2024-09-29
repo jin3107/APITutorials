@@ -1,5 +1,6 @@
 ﻿using APITutorials.Data;
 using APITutorials.DTOs.Stock;
+using APITutorials.Helper;
 using APITutorials.Models;
 using APITutorials.Repositories.Interface;
 using Microsoft.EntityFrameworkCore;
@@ -47,6 +48,51 @@ namespace APITutorials.Repositories.Implementation
         {
             return await _context.Stocks.Include(c => c.Comments)
                 .FirstOrDefaultAsync(i => i.Id == id);
+        }
+
+        public async Task<List<Stock>> SearchAsync(QueryObject query)
+        {
+            var stocks = _context.Stocks.Include(c => c.Comments).AsQueryable();
+            if (!string.IsNullOrWhiteSpace(query.CompanyName))
+            {
+                stocks = stocks.Where(s => s.CompanyName!.Contains(query.CompanyName));
+            }
+
+            if (!string.IsNullOrWhiteSpace(query.Symbol))
+            {
+                stocks = stocks.Where(s => s.Symbol!.Contains(query.Symbol));
+            }
+
+            if (!string.IsNullOrWhiteSpace(query.SortBy))
+            {
+                switch (query.SortBy.ToLower())
+                {
+                    case "symbol":
+                        stocks = query.IsDecsending
+                            ? stocks.OrderByDescending(s => s.Symbol)
+                            : stocks.OrderBy(s => s.Symbol);
+                        break;
+                    case "companyname":
+                        stocks = query.IsDecsending
+                            ? stocks.OrderByDescending(s => s.CompanyName)
+                            : stocks.OrderBy(s => s.CompanyName);
+                        break;
+                    case "marketcap":
+                        stocks = query.IsDecsending
+                            ? stocks.OrderByDescending(s => s.MarketCap)
+                            : stocks.OrderBy(s => s.MarketCap);
+                        break;
+                    case "lastdiv":
+                        stocks = query.IsDecsending
+                            ? stocks.OrderByDescending(s => s.LastDiv)
+                            : stocks.OrderBy(s => s.LastDiv);
+                        break;
+                    default:
+                        break;
+                }
+            }
+
+            return await stocks.ToListAsync();
         }
 
         public async Task<bool> StockExits(Guid id)

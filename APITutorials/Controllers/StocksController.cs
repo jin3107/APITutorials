@@ -1,11 +1,13 @@
 ﻿using APITutorials.Data;
 using APITutorials.DTOs.Stock;
+using APITutorials.Helper;
 using APITutorials.Mappers;
 using APITutorials.Models;
 using APITutorials.Repositories.Interface;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using NuGet.Protocol.Core.Types;
 
 namespace APITutorials.Controllers
 {
@@ -13,12 +15,10 @@ namespace APITutorials.Controllers
     [ApiController]
     public class StocksController : ControllerBase
     {
-        private readonly ApplicationDbContext _context;
         private readonly IStockRepository _stockRepository;
 
-        public StocksController(ApplicationDbContext context, IStockRepository stockRepository)
+        public StocksController(IStockRepository stockRepository)
         {
-            _context = context;
             _stockRepository = stockRepository;
         }
 
@@ -90,6 +90,19 @@ namespace APITutorials.Controllers
             }
 
             return NoContent();
+        }
+
+        [HttpPost("search")]
+        public async Task<ActionResult<List<Stock>>> Search([FromBody] QueryObject query)
+        {
+            var stocks = await _stockRepository.SearchAsync(query);
+
+            if (stocks == null || stocks.Count == 0)
+            {
+                return NotFound("No stocks found with the specified criteria.");
+            }
+
+            return Ok(stocks);
         }
     }
 }
