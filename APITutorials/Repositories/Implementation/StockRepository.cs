@@ -92,7 +92,10 @@ namespace APITutorials.Repositories.Implementation
                 }
             }
 
-            return await stocks.ToListAsync();
+            var skipNumber = (query.PageNumber - 1) * query.PageSize;
+            var result =  await stocks.Skip(skipNumber).Take(query.PageSize).ToListAsync();
+            
+            return result;
         }
 
         public async Task<bool> StockExits(Guid id)
