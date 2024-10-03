@@ -1,5 +1,8 @@
-﻿namespace APITutorials.Models
+﻿using System.ComponentModel.DataAnnotations.Schema;
+
+namespace APITutorials.Models
 {
+    [Table("Comments")]
     public class Comment
     {
         public Guid Id { get; set; }
