@@ -13,5 +13,6 @@ namespace APITutorials.Repositories.Interface
         Task<Stock?> DeleteAsync(Guid id);
         Task<List<Stock>> SearchAsync(QueryObject query);
         Task<bool> StockExits(Guid id);
+        Task<Stock?> GetBySymbolAsync(string symbol);
     }
 }
