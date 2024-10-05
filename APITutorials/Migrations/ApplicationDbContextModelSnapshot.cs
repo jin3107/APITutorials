@@ -190,13 +190,13 @@ namespace APITutorials.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "c51d8ce4-69a8-4e2c-a7be-e84a3413695c",
+                            Id = "50280437-9e7e-4a14-b750-d921783dbecd",
                             Name = "Admin",
                             NormalizedName = "ADMIN"
                         },
                         new
                         {
-                            Id = "8c0b7739-757f-49ea-9fc6-e08e1a7b07a6",
+                            Id = "f9eb1866-59fd-4948-9524-ee8e1e170f48",
                             Name = "User",
                             NormalizedName = "USER"
                         });

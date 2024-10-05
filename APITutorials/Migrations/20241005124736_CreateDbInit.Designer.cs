@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace APITutorials.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20241003142337_Many-To-Many")]
-    partial class ManyToMany
+    [Migration("20241005124736_CreateDbInit")]
+    partial class CreateDbInit
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -96,6 +96,9 @@ namespace APITutorials.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<string>("AppUserId")
+                        .HasColumnType("nvarchar(450)");
+
                     b.Property<string>("Content")
                         .HasColumnType("nvarchar(max)");
 
@@ -109,6 +112,8 @@ namespace APITutorials.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("AppUserId");
 
                     b.HasIndex("StockId");
 
@@ -188,13 +193,13 @@ namespace APITutorials.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "c34c840e-5a17-4aba-beb0-a42e068c09a1",
+                            Id = "50280437-9e7e-4a14-b750-d921783dbecd",
                             Name = "Admin",
                             NormalizedName = "ADMIN"
                         },
                         new
                         {
-                            Id = "e1b45586-a9c9-490e-9bfb-e04384d502d0",
+                            Id = "f9eb1866-59fd-4948-9524-ee8e1e170f48",
                             Name = "User",
                             NormalizedName = "USER"
                         });
@@ -308,9 +313,15 @@ namespace APITutorials.Migrations
 
             modelBuilder.Entity("APITutorials.Models.Comment", b =>
                 {
+                    b.HasOne("APITutorials.Models.AppUser", "AppUser")
+                        .WithMany()
+                        .HasForeignKey("AppUserId");
+
                     b.HasOne("APITutorials.Models.Stock", "Stock")
                         .WithMany("Comments")
                         .HasForeignKey("StockId");
+
+                    b.Navigation("AppUser");
 
                     b.Navigation("Stock");
                 });

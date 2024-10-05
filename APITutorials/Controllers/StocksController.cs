@@ -27,12 +27,20 @@ namespace APITutorials.Controllers
         [Authorize]
         public async Task<IActionResult> GetAll()
         {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
+            try
+            {
+                if (!ModelState.IsValid)
+                    return BadRequest(ModelState);
 
-            var stocks = await _stockRepository.GetAllAsync();
-            var stockDto = stocks.Select(s => s.ToStockDto());
-            return Ok(stocks);
+                var stocks = await _stockRepository.GetAllAsync();
+                var stockDto = stocks.Select(s => s.ToStockDto()).ToList();
+
+                return Ok(stockDto);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
         [HttpGet("{id:guid}")]

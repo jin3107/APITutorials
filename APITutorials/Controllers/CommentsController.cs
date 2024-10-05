@@ -1,8 +1,11 @@
 ﻿using APITutorials.DTOs.Comment;
 using APITutorials.DTOs.Stock;
+using APITutorials.Extensions;
 using APITutorials.Mappers;
+using APITutorials.Models;
 using APITutorials.Repositories.Interface;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System.Runtime.InteropServices;
 
@@ -14,11 +17,13 @@ namespace APITutorials.Controllers
     {
         private readonly ICommentRepository _commentRepository;
         private readonly IStockRepository _stockRepository;
+        private readonly UserManager<AppUser> _userManager;
 
-        public CommentsController(ICommentRepository commentRepository, IStockRepository stockRepository)
+        public CommentsController(ICommentRepository commentRepository, IStockRepository stockRepository, UserManager<AppUser> userManager)
         {
             _commentRepository = commentRepository;
             _stockRepository = stockRepository;
+            _userManager = userManager;
         }
 
         [HttpGet]
@@ -58,7 +63,11 @@ namespace APITutorials.Controllers
                 return BadRequest("Stock does not exist");
             }
 
+            var userName = User.GetUserName();
+            var appUser = await _userManager.FindByNameAsync(userName);
+
             var commentModel = commentDto.ToCommentFromCreate(stockId);
+            commentModel.AppUserId = appUser?.Id;
             await _commentRepository.CreateAsync(commentModel);
 
             return CreatedAtAction(nameof(GetById), new { id = commentModel.Id }, commentModel.ToCommentDto());
