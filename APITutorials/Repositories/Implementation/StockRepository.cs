@@ -99,7 +99,7 @@ namespace APITutorials.Repositories.Implementation
             }
 
             var skipNumber = (query.PageNumber - 1) * query.PageSize;
-            var result =  await stocks.Skip(skipNumber).Take(query.PageSize).ToListAsync();
+            var result = await stocks.Skip(skipNumber).Take(query.PageSize).ToListAsync();
             
             return result;
         }

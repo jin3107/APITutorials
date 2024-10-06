@@ -1,6 +1,7 @@
 ﻿using APITutorials.Extensions;
 using APITutorials.Models;
 using APITutorials.Repositories.Interface;
+using APITutorials.Services.Interface;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
@@ -16,12 +17,15 @@ namespace APITutorials.Controllers
         private readonly UserManager<AppUser> _userManager;
         private readonly IStockRepository _stockRepository;
         private readonly IPortfioloRepository _portfioloRepository;
+        private readonly IFMPService _fmpService;
 
-        public PortfoliosController(UserManager<AppUser> userManager, IStockRepository stockRepository, IPortfioloRepository portfioloRepository)
+        public PortfoliosController(UserManager<AppUser> userManager, 
+            IStockRepository stockRepository, IPortfioloRepository portfioloRepository, IFMPService fMPService)
         {
             _userManager = userManager;
             _stockRepository = stockRepository;
             _portfioloRepository = portfioloRepository;
+            _fmpService = fMPService;
         }
 
         [HttpGet]

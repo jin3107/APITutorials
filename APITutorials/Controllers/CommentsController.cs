@@ -1,9 +1,11 @@
 ﻿using APITutorials.DTOs.Comment;
 using APITutorials.DTOs.Stock;
 using APITutorials.Extensions;
+using APITutorials.Helper;
 using APITutorials.Mappers;
 using APITutorials.Models;
 using APITutorials.Repositories.Interface;
+using APITutorials.Services.Interface;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -18,12 +20,15 @@ namespace APITutorials.Controllers
         private readonly ICommentRepository _commentRepository;
         private readonly IStockRepository _stockRepository;
         private readonly UserManager<AppUser> _userManager;
+        private readonly IFMPService _fMPService;
 
-        public CommentsController(ICommentRepository commentRepository, IStockRepository stockRepository, UserManager<AppUser> userManager)
+        public CommentsController(ICommentRepository commentRepository, 
+            IStockRepository stockRepository, UserManager<AppUser> userManager, IFMPService fMPService)
         {
             _commentRepository = commentRepository;
             _stockRepository = stockRepository;
             _userManager = userManager;
+            _fMPService = fMPService;
         }
 
         [HttpGet]
@@ -52,21 +57,30 @@ namespace APITutorials.Controllers
             return Ok(comment.ToCommentDto());
         }
 
-        [HttpPost("{stockId:guid}")]
-        public async Task<IActionResult> Create([FromRoute] Guid stockId, [FromBody] CreateCommentRequestDto commentDto)
+        [HttpPost("{symbol:alpha}")]
+        public async Task<IActionResult> Create([FromRoute] string symbol, [FromBody] CreateCommentRequestDto commentDto)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            if (!await _stockRepository.StockExits(stockId))
+            var stock = await _stockRepository.GetBySymbolAsync(symbol);
+            if (stock == null)
             {
-                return BadRequest("Stock does not exist");
+                stock = await _fMPService.FindStockBySymbolAsync(symbol);
+                if (stock == null)
+                {
+                    return BadRequest("Stock does not exists");
+                }
+                else
+                {
+                    await _stockRepository.CreateAsync(stock);
+                }
             }
 
             var userName = User.GetUserName();
             var appUser = await _userManager.FindByNameAsync(userName);
 
-            var commentModel = commentDto.ToCommentFromCreate(stockId);
+            var commentModel = commentDto.ToCommentFromCreate(stock.Id);
             commentModel.AppUserId = appUser?.Id;
             await _commentRepository.CreateAsync(commentModel);
 
@@ -103,6 +117,19 @@ namespace APITutorials.Controllers
             }
 
             return Ok(commentModel);
+        }
+
+        [HttpPost("search")]
+        public async Task<ActionResult<List<Comment>>> Search([FromBody] CommentQueryObject queryObject)
+        {
+            var comments = await _commentRepository.SearchAsync(queryObject);
+
+            if (comments == null || comments.Count == 0)
+            {
+                return NotFound("No comments found with the specified criteria.");
+            }
+
+            return Ok(comments);
         }
     }
 }

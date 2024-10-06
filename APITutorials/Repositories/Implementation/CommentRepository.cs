@@ -1,8 +1,10 @@
 ﻿using APITutorials.Data;
 using APITutorials.DTOs.Comment;
 using APITutorials.DTOs.Stock;
+using APITutorials.Helper;
 using APITutorials.Models;
 using APITutorials.Repositories.Interface;
+using Microsoft.CodeAnalysis.FlowAnalysis.DataFlow.ValueContentAnalysis;
 using Microsoft.EntityFrameworkCore;
 
 namespace APITutorials.Repositories.Implementation
@@ -48,6 +50,24 @@ namespace APITutorials.Repositories.Implementation
         {
             return await _context.Comments
                 .Include(a => a.AppUser).FirstOrDefaultAsync(c => c.Id == id);
+        }
+
+        public async Task<List<Comment>> SearchAsync(CommentQueryObject queryObject)
+        {
+            var comments = _context.Comments.Include(a => a.AppUser).AsQueryable();
+            if (!string.IsNullOrWhiteSpace(queryObject.Symbol))
+            {
+                comments = comments.Where(s => s.Stock!.Symbol == queryObject.Symbol);
+            }
+            if (queryObject.IsDecsending == true)
+            {
+                comments = comments.OrderByDescending(c => c.CreatedOn);
+            }
+            
+            var skipNumber = (queryObject.PageNumber - 1) * queryObject.PageSize;
+            var results = await comments.Skip(skipNumber).Take(queryObject.PageSize).ToListAsync();
+
+            return results;
         }
 
         public async Task<Comment?> UpdateAsync(Guid id, Comment commentModel)

@@ -1,4 +1,5 @@
 ﻿using APITutorials.DTOs.Comment;
+using APITutorials.Helper;
 using APITutorials.Models;
 
 namespace APITutorials.Repositories.Interface
@@ -10,5 +11,6 @@ namespace APITutorials.Repositories.Interface
         Task<Comment> CreateAsync(Comment commentModel);
         Task<Comment?> UpdateAsync(Guid id, Comment commentModel);
         Task<Comment?> DeleteAsync(Guid id);
+        Task<List<Comment>> SearchAsync(CommentQueryObject queryObject);
     }
 }
