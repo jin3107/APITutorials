@@ -1,12 +1,11 @@
 ﻿using APITutorials.Extensions;
 using APITutorials.Models;
-using APITutorials.Repositories.Interface;
 using APITutorials.Services.Interface;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using System.Net.WebSockets;
+using System;
+using System.Threading.Tasks;
 
 namespace APITutorials.Controllers
 {
@@ -14,18 +13,11 @@ namespace APITutorials.Controllers
     [ApiController]
     public class PortfoliosController : ControllerBase
     {
-        private readonly UserManager<AppUser> _userManager;
-        private readonly IStockRepository _stockRepository;
-        private readonly IPortfioloRepository _portfioloRepository;
-        private readonly IFMPService _fmpService;
+        private readonly IPortfolioService _portfolioService;
 
-        public PortfoliosController(UserManager<AppUser> userManager, 
-            IStockRepository stockRepository, IPortfioloRepository portfioloRepository, IFMPService fMPService)
+        public PortfoliosController(IPortfolioService portfolioService)
         {
-            _userManager = userManager;
-            _stockRepository = stockRepository;
-            _portfioloRepository = portfioloRepository;
-            _fmpService = fMPService;
+            _portfolioService = portfolioService;
         }
 
         [HttpGet]
@@ -33,54 +25,89 @@ namespace APITutorials.Controllers
         public async Task<IActionResult> GetUserPortfolio()
         {
             var userName = User.GetUserName();
-            var appUser = await _userManager.FindByNameAsync(userName);
-            var userPortfolio = await _portfioloRepository.GetUserPortfolio(appUser!);
+            if (string.IsNullOrEmpty(userName))
+            {
+                return Unauthorized("User not authenticated");
+            }
 
-            return Ok(userPortfolio);
+            try
+            {
+                var userPortfolio = await _portfolioService.GetUserPortfolioAsync(userName);
+                return Ok(userPortfolio);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, "An error occurred while processing your request.");
+            }
         }
 
         [HttpPost]
         [Authorize]
-        public async Task<IActionResult> AddPortfolio(string symbol)
+        public async Task<IActionResult> AddPortfolio([FromQuery] string symbol)
         {
             var userName = User.GetUserName();
-            var appUser = await _userManager.FindByNameAsync(userName);
-            var stock = await _stockRepository.GetBySymbolAsync(symbol);
-
-            if (stock == null) return BadRequest("Stock not found!");
-            var userPortfolio = await _portfioloRepository.GetUserPortfolio(appUser!);
-            if (userPortfolio.Any(e => e.Symbol!.ToLower() == symbol.ToLower())) return BadRequest("Can not add same stock to portfolio!");
-
-            var portfolioModel = new Portfolio
+            if (string.IsNullOrEmpty(userName))
             {
-                StockId = stock.Id,
-                AppUserId = appUser!.Id,
-            };
+                return Unauthorized("User not authenticated");
+            }
 
-            await _portfioloRepository.CreateAsync(portfolioModel);
-            if (portfolioModel == null) return StatusCode(500, "Could not create!");
-            else return Created();
+            try
+            {
+                var createdPortfolio = await _portfolioService.AddPortfolioAsync(userName, symbol);
+                return Created();
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, "An error occurred while processing your request.");
+            }
         }
 
         [HttpDelete]
         [Authorize]
-        public async Task<IActionResult> DeletePrtfolio(string symbol)
+        public async Task<IActionResult> DeletePortfolio([FromQuery] string symbol)
         {
             var userName = User.GetUserName();
-            var appUser = await _userManager.FindByNameAsync(userName);
-            var userPortfolio = await _portfioloRepository.GetUserPortfolio(appUser!);
-
-            var filterStock = userPortfolio.Where(s => s.Symbol!.ToLower() == symbol.ToLower()).ToList();
-            if (filterStock.Count() == 1)
+            if (string.IsNullOrEmpty(userName))
             {
-                await _portfioloRepository.DeletePortfolio(appUser!, symbol);
-            }
-            else
-            {
-                return BadRequest("Stock not in your Portfolio");
+                return Unauthorized("User not authenticated");
             }
 
-            return Ok();
+            try
+            {
+                var result = await _portfolioService.DeletePortfolioAsync(userName, symbol);
+                if (result)
+                {
+                    return Ok("Portfolio deleted successfully.");
+                }
+                else
+                {
+                    return BadRequest("Could not delete portfolio.");
+                }
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, "An error occurred while processing your request.");
+            }
         }
     }
 }

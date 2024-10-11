@@ -1,14 +1,10 @@
-﻿using APITutorials.Data;
-using APITutorials.DTOs.Stock;
+﻿using APITutorials.DTOs.Stock;
 using APITutorials.Helper;
 using APITutorials.Mappers;
 using APITutorials.Models;
-using APITutorials.Repositories.Interface;
+using APITutorials.Services.Interface;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using NuGet.Protocol.Core.Types;
 
 namespace APITutorials.Controllers
 {
@@ -16,11 +12,11 @@ namespace APITutorials.Controllers
     [ApiController]
     public class StocksController : ControllerBase
     {
-        private readonly IStockRepository _stockRepository;
+        private readonly IStockService _stockService;
 
-        public StocksController(IStockRepository stockRepository)
+        public StocksController(IStockService stockService)
         {
-            _stockRepository = stockRepository;
+            _stockService = stockService;
         }
 
         [HttpGet]
@@ -32,7 +28,7 @@ namespace APITutorials.Controllers
                 if (!ModelState.IsValid)
                     return BadRequest(ModelState);
 
-                var stocks = await _stockRepository.GetAllAsync();
+                var stocks = await _stockService.GetAllAsync();
                 var stockDto = stocks.Select(s => s.ToStockDto()).ToList();
 
                 return Ok(stockDto);
@@ -49,8 +45,8 @@ namespace APITutorials.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            var stock = await _stockRepository.GetByIdAsync(id);
-            if (stock == null) 
+            var stock = await _stockService.GetByIdAsync(id);
+            if (stock == null)
             {
                 return NotFound();
             }
@@ -64,10 +60,9 @@ namespace APITutorials.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            var stockModel = stockDto.ToStockFromCreateDto();
-            await _stockRepository.CreateAsync(stockModel);
+            var createdStock = await _stockService.CreateAsync(stockDto);
 
-            return CreatedAtAction(nameof(GetById), new { id = stockModel.Id }, stockModel.ToStockDto());
+            return CreatedAtAction(nameof(GetById), new { id = createdStock!.Id }, createdStock.ToStockDto());
         }
 
         [HttpPut]
@@ -77,13 +72,13 @@ namespace APITutorials.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            var stockModel = await _stockRepository.UpdateAsync(id, updateDto);
-            if (stockModel == null)
+            var updatedStock = await _stockService.UpdateAsync(id, updateDto);
+            if (updatedStock == null)
             {
                 return NotFound();
             }
 
-            return Ok(stockModel.ToStockDto());
+            return Ok(updatedStock.ToStockDto());
         }
 
         [HttpDelete]
@@ -93,8 +88,8 @@ namespace APITutorials.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            var stockModel = await _stockRepository.DeleteAsync(id);
-            if (stockModel == null)
+            var deletedStock = await _stockService.DeleteAsync(id);
+            if (deletedStock == null)
             {
                 return NotFound();
             }
@@ -105,7 +100,7 @@ namespace APITutorials.Controllers
         [HttpPost("search")]
         public async Task<ActionResult<List<Stock>>> Search([FromBody] QueryObject query)
         {
-            var stocks = await _stockRepository.SearchAsync(query);
+            var stocks = await _stockService.SearchAsync(query);
 
             if (stocks == null || stocks.Count == 0)
             {
