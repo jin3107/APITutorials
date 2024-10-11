@@ -1,4 +1,3 @@
-/* Content.css */
 .styled-table {
     width: 100%;
     border-collapse: collapse;
@@ -10,10 +9,20 @@
 
 .styled-table thead tr {
     background-color: #009879;
+    text-align: left;
     color: #ffffff;
 }
 
 .styled-table th,
 .styled-table td {
     padding: 12px 15px;
+}
+
+.styled-table tbody tr {
+    border-bottom: 1px solid #dddddd;
+    text-align: left;
+}
+
+.styled-table tbody tr:last-of-type {
+    border-bottom: 2px solid #009879;
 }

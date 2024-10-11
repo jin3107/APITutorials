@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
-import './Content.css'; // Nhớ tạo file CSS này
+import '../Components/Comment.css';
 
-function Content() {
+function Comment() {
     const [comments, setComments] = useState([]);
 
     useEffect(() => {
@@ -43,4 +43,4 @@ function Content() {
     );
 }
 
-export default Content;
+export default Comment;

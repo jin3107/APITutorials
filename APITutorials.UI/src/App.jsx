@@ -2,7 +2,7 @@ import { useState } from 'react'
 import reactLogo from './assets/react.svg'
 import viteLogo from '/vite.svg'
 import './App.css'
-import Content from './Content'
+import Comment from './Components/Comment'
 
 function App() {
   const [show, setShow] = useState(false)
@@ -11,7 +11,7 @@ function App() {
     <>
       <div className='App'>
         <button onClick={() => setShow(!show)}>Toggle</button>
-        {show && <Content />}
+        {show && <Comment />}
       </div>
     </>
   )

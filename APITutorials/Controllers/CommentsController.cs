@@ -22,7 +22,6 @@ namespace APITutorials.Controllers
         }
 
         [HttpGet]
-        [Authorize]
         public async Task<IActionResult> GetAll()
         {
             if (!ModelState.IsValid)
