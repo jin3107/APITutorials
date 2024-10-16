@@ -29,7 +29,10 @@ button {
   font-size: 1em;
   font-weight: 500;
   font-family: inherit;
-  background-color: #b6e8bd;
+  background-color: #009879;
   cursor: pointer;
   transition: border-color 0.25s;
+  box-shadow: 0 0 10px rgba(249, 240, 240, 0.903);
+  border-radius: 50px;
+  border: 3px solid #dddddd;
 }
